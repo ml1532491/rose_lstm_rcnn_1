@@ -28,7 +28,7 @@ def lstm(num_hidden, indata, prev_state, param, seqidx, layeridx, dropout=0.):
 
     i2h = mx.sym.Convolution(data=indata,
                              workspace=2048,
-                             kernel=(1, 1), pad=(0, 0), stride=(1, 1),
+                             kernel=(3, 3), pad=(1, 1), stride=(1, 1),
                                 weight=param.i2h_weight,
                                 bias=param.i2h_bias,
                                 num_filter=num_hidden * 4,
@@ -37,7 +37,7 @@ def lstm(num_hidden, indata, prev_state, param, seqidx, layeridx, dropout=0.):
 
     h2h = mx.sym.Convolution(data=prev_state.h,
                              workspace=2048,
-                             kernel=(5, 5), pad=(2, 2), stride=(1, 1),
+                             kernel=(3, 3), pad=(1, 1), stride=(1, 1),
 
                                 weight=param.h2h_weight,
                                 bias=param.h2h_bias,
@@ -148,7 +148,7 @@ def get_lstm_vgg_conv(data, param, seqidx):
     relu5_3 = mx.symbol.Activation(data=conv5_3, act_type="relu", name="relu5_3_%d" % seqidx)
 
     return relu5_3
-def get_lstm_vgg_train(seq_len, num_classes=config.NUM_CLASSES, num_anchors=config.NUM_ANCHORS, dropout=0.,num_hidden=1024):
+def get_lstm_vgg_train(seq_len, num_classes=config.NUM_CLASSES, num_anchors=config.NUM_ANCHORS, dropout=0.):
     datas = mx.symbol.Variable(name="data")
     im_infos = mx.symbol.Variable(name="im_info")
     gt_boxess = mx.symbol.Variable(name="gt_boxes")
@@ -158,14 +158,13 @@ def get_lstm_vgg_train(seq_len, num_classes=config.NUM_CLASSES, num_anchors=conf
 
     # datas=mx.sym.SliceChannel(data=datas, num_outputs=seq_len, squeeze_axis=1)
     im_infos = mx.sym.SliceChannel(data=im_infos, num_outputs=seq_len, axis=0)
-    # im_infos = mx.sym.SliceChannel(data=im_infos[0], num_outputs=20)
     gt_boxess = mx.sym.SliceChannel(data=gt_boxess, num_outputs=seq_len, axis=0)
     rpn_labels = mx.sym.SliceChannel(data=rpn_labels, num_outputs=seq_len, axis=0)
     rpn_bbox_targets = mx.sym.SliceChannel(data=rpn_bbox_targets, num_outputs=seq_len, axis=0)
     rpn_bbox_weights = mx.sym.SliceChannel(data=rpn_bbox_weights, num_outputs=seq_len, axis=0)
 
     param=get_all_vgg_rpn_param()
-    wordvec=get_lstm_vgg_conv(datas,param,0)
+    wordvec=get_lstm_vgg_conv(datas,param,)
     wordvec=mx.sym.SliceChannel(data=wordvec, num_outputs=seq_len, axis=0)
     # wordvec=[]
     # # embed
@@ -187,6 +186,7 @@ def get_lstm_vgg_train(seq_len, num_classes=config.NUM_CLASSES, num_anchors=conf
 
 
     forward_hidden = []
+    num_hidden=256
     for seqidx in range(seq_len):
         hidden = wordvec[seqidx]
         next_state = lstm(num_hidden, indata=hidden,

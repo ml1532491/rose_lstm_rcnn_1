@@ -27,7 +27,7 @@ def train_net(args, ctx, pretrained, epoch, prefix, begin_epoch, end_epoch,
     config.TRAIN.BBOX_NORMALIZATION_PRECOMPUTED = True
 
     # load symbol
-    sym = eval('get_lstm_' + args.network + '_train')(config.seqlen,num_classes=config.NUM_CLASSES, num_anchors=config.NUM_ANCHORS,num_hidden=config.num_hidden)
+    sym = eval('get_lstm_' + args.network + '_train')(config.seqlen,num_classes=config.NUM_CLASSES, num_anchors=config.NUM_ANCHORS)
     sym_fe = eval('get_' + args.network + '_train')(num_classes=config.NUM_CLASSES,
                                                       num_anchors=config.NUM_ANCHORS)
     feat_sym = sym_fe.get_internals()['rpn_cls_score_output']
